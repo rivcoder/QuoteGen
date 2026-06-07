@@ -261,11 +261,26 @@ ${includeApproval ? `
 </html>`;
 }
 
+// ── Generate client portal link ───────────────────────────────────────────────
+function generatePortalLink(answers, quote, profile) {
+  try {
+    const safeProfile = profile ? { ...profile, logo: null } : null;
+    const payload = { answers, quote, profile: safeProfile, currency: answers.currency || "INR" };
+    const json = JSON.stringify(payload);
+    const encoded = btoa(encodeURIComponent(json));
+    return `${window.location.origin}${window.location.pathname}#${encoded}`;
+  } catch {
+    return null;
+  }
+}
+
 export default function PreviewExport({ answers, setAnswers, profile, onNew }) {
   const currency = answers.currency || "INR";
   const [quoteId] = useState(() => answers.quoteId || generateQuoteId());
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [linkError, setLinkError] = useState("");
 
   const answersWithId = { ...answers, quoteId };
   const quote = calculateQuote(answersWithId);
@@ -307,6 +322,19 @@ export default function PreviewExport({ answers, setAnswers, profile, onNew }) {
     saveQuoteToHistory(answersWithId, quote, quoteId);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
+  };
+
+  const handleShareLink = () => {
+    setLinkError("");
+    const link = generatePortalLink(answersWithId, quote, profile);
+    if (!link) { setLinkError("Could not generate link — quote may be too large."); return; }
+    if (link.length > 100000) { setLinkError("Quote has too much data for a URL. Remove some line items or shorten descriptions."); return; }
+    navigator.clipboard.writeText(link).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 3000);
+    }).catch(() => {
+      setLinkError("Could not copy — please copy manually: " + link.substring(0, 60) + "...");
+    });
   };
 
   const revService = answers.service ? answers.service.charAt(0).toUpperCase() + answers.service.slice(1) : "";
@@ -402,6 +430,23 @@ export default function PreviewExport({ answers, setAnswers, profile, onNew }) {
         background: "linear-gradient(135deg,#6c63ff,#a78bfa)", color: "#fff",
         fontSize: 15, fontWeight: 700, cursor: "pointer", marginBottom: 10, fontFamily: "inherit",
       }}>⬇ Download PDF</button>
+
+      {/* Share link — client portal */}
+      <button onClick={handleShareLink} style={{
+        width: "100%", padding: 13, borderRadius: 12, marginBottom: 10,
+        border: `1.5px solid ${linkCopied ? "#34d399" : "#6c63ff"}`,
+        background: linkCopied ? "#0d2e1f" : "#0d1028",
+        color: linkCopied ? "#34d399" : "#a78bfa",
+        fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+        transition: "all 0.2s",
+      }}>
+        {linkCopied ? "✓ Link copied! Send it to your client" : "🔗 Share Client Portal Link"}
+      </button>
+      {linkCopied && (
+        <div style={{ fontSize: 11, color: "#4a5080", textAlign: "center", marginBottom: 10, marginTop: -6 }}>
+          Client opens the link → sees the quote → clicks Accept or Reject
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
         <Btn onClick={handleWhatsApp} variant="ghost" style={{ border: "1.5px solid #25D366", color: "#25D366", padding: 13, width: "100%" }}>💬 WhatsApp</Btn>
