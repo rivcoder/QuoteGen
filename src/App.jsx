@@ -1,10 +1,12 @@
 import { useState, useEffect, Component } from "react";
 import { loadFreelancerProfile, getPIN, hasSeenSplash, markSplashSeen } from "./utils/calculate";
+import ClientPortal from "./components/ClientPortal";
 import { ErrorBoundaryFallback } from "./components/UI";
 import Splash from "./components/Splash";
 import { CreatePIN, EnterPIN } from "./components/PINScreen";
 import logo from "./quotelogo.png";
 
+import ClientPortal from "./components/ClientPortal";
 import FreelancerProfile from "./sections/FreelancerProfile";
 import ClientInfo from "./sections/ClientInfo";
 import ProjectDetails from "./sections/ProjectDetails";
@@ -56,6 +58,11 @@ const DEFAULT_ANSWERS = {
 // "splash" → "pin_create" (first time) | "pin_enter" (returning) → "app"
 
 export default function App() {
+  // ── Client portal detection — if URL has #quote data, show portal ──────────
+  if (window.location.hash && window.location.hash.length > 10) {
+    return <ClientPortal />;
+  }
+
   const firstTime = !hasSeenSplash();
   const storedPIN = getPIN();
 
