@@ -1,4 +1,9 @@
-import { SERVICES, TIMELINE, TIERS, USD_RATE } from "../data/pricing";
+import { getPricingForMode, findModeForService } from "../data/pricingLoader";
+
+// ── Get pricing data for current mode ────────────────────────────────────────
+function getPricing(mode) {
+  return getPricingForMode(mode || "freelancer");
+}
 
 // ── Sanitize — strips ALL html tags from user input (XSS fix) ────────────────
 export function sanitize(str) {
@@ -71,8 +76,10 @@ export function sanitizeTemplateAnswers(raw) {
 export function fmt(amount, currency = "INR") {
   if (!isFinite(amount) || isNaN(amount)) return currency === "USD" ? "$0" : "₹0";
   const rounded = Math.round(amount);
-  if (currency === "USD")
-    return "$" + Math.round(rounded / USD_RATE).toLocaleString("en-US");
+  if (currency === "USD") {
+    const rate = 83; // INR per USD — matches pricing data
+    return "$" + Math.round(rounded / rate).toLocaleString("en-US");
+  }
   return "₹" + rounded.toLocaleString("en-IN");
 }
 
@@ -90,10 +97,23 @@ export function generateQuoteId() {
   return `QG-${t}-${r}`;
 }
 
-// ── Main calculation ─────────────────────────────────────────────────────────
 export function calculateQuote(answers) {
-  const service = SERVICES[answers.service];
+  let activeMode = answers.mode;
+  let pricing = getPricing(activeMode);
+  let service = pricing.SERVICES?.[answers.service];
+
+  if (!service && answers.service) {
+    const detectedMode = findModeForService(answers.service);
+    if (detectedMode) {
+      activeMode = detectedMode;
+      pricing = getPricing(activeMode);
+      service = pricing.SERVICES?.[answers.service];
+    }
+  }
+
   if (!service) return null;
+
+  const { SERVICES, TIMELINE, TIERS, USD_RATE } = pricing;
 
   const baseConfig = service.base[answers.baseType];
   const basePrice = baseConfig ? baseConfig.price : 0;
@@ -224,7 +244,7 @@ const PIN_KEY       = "quotegen_pin";
 const SEEN_KEY      = "quotegen_seen";
 
 // Save quote — strip logo from history entry to avoid storage bomb
-export function saveQuoteToHistory(answers, quote, quoteId) {
+export function saveQuoteToHistory(answers, quote, quoteId, mode) {
   try {
     const existing = getQuoteHistory();
     const entry = {
@@ -235,8 +255,8 @@ export function saveQuoteToHistory(answers, quote, quoteId) {
       serviceLabel: quote.serviceLabel,
       total: quote.total,
       currency: answers.currency || "INR",
-      // strip logo from stored answers to save space
-      answers: { ...answers, _logoStripped: true },
+      // strip logo from stored answers to save space, but persist mode
+      answers: { ...answers, mode: answers.mode || mode || "freelancer", _logoStripped: true },
       quote,
     };
     localStorage.setItem(HISTORY_KEY, JSON.stringify([entry, ...existing].slice(0, 20)));
