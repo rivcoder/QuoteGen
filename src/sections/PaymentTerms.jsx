@@ -1,28 +1,28 @@
-import { SectionTitle, Card, CardTitle, Slider, CheckboxGroup, TextInput, Divider } from "../components/UI";
+import { SectionTitle, Card, CardTitle, Slider, CheckboxGroup, TextInput, C } from "../components/UI";
 import { fmt, calculateQuote } from "../utils/calculate";
 
 const PAYMENT_METHODS = [
-  { value: "upi", label: "UPI", icon: "📲" },
-  { value: "bank", label: "Bank Transfer", icon: "🏦" },
-  { value: "paypal", label: "PayPal", icon: "💙" },
-  { value: "stripe", label: "Stripe", icon: "💳" },
-  { value: "cash", label: "Cash", icon: "💵" },
-  { value: "cheque", label: "Cheque", icon: "📄" },
+  { value: "upi",    label: "UPI",           icon: "📲" },
+  { value: "bank",   label: "Bank Transfer", icon: "🏦" },
+  { value: "paypal", label: "PayPal",        icon: "💙" },
+  { value: "stripe", label: "Stripe",        icon: "💳" },
+  { value: "cash",   label: "Cash",          icon: "💵" },
+  { value: "cheque", label: "Cheque",        icon: "📄" },
 ];
 
 export default function PaymentTerms({ answers, setAnswers }) {
   const set = (k, v) => setAnswers(a => ({ ...a, [k]: v }));
-  const quote = calculateQuote(answers);
-  const currency = answers.currency || "INR";
-  const advancePct = answers.advancePct ?? 50;
-  const advanceAmt = quote ? quote.total * (advancePct / 100) : 0;
-  const remainingAmt = quote ? quote.total - advanceAmt : 0;
+  const quote       = calculateQuote(answers);
+  const currency    = answers.currency || "INR";
+  const advancePct  = answers.advancePct ?? 50;
+  const advanceAmt  = quote ? quote.total * (advancePct / 100) : 0;
+  const remainAmt   = quote ? quote.total - advanceAmt : 0;
 
   return (
     <div>
       <SectionTitle sub="How and when you get paid">Payment Terms</SectionTitle>
 
-      {/* Advance / remaining split */}
+      {/* Advance split */}
       <Card style={{ marginBottom: 16 }}>
         <CardTitle>Payment Schedule</CardTitle>
         <Slider
@@ -36,15 +36,33 @@ export default function PaymentTerms({ answers, setAnswers }) {
 
         {quote && (
           <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <div style={{ background: "#12152e", borderRadius: 12, padding: 14, border: "1px solid #1e2140", textAlign: "center" }}>
-              <div style={{ fontSize: 11, color: "#8b9cf4", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Advance ({advancePct}%)</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: "#34d399" }}>{fmt(advanceAmt, currency)}</div>
-              <div style={{ fontSize: 11, color: "#4a5080", marginTop: 4 }}>Due before work starts</div>
+            {/* Advance */}
+            <div style={{
+              background: "rgba(34,197,94,0.06)",
+              borderRadius: 12, padding: 16,
+              border: "1px solid rgba(34,197,94,0.15)", textAlign: "center",
+            }}>
+              <div style={{ fontSize: 11, color: C.textMuted, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                Advance ({advancePct}%)
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: C.success, letterSpacing: -0.5 }}>
+                {fmt(advanceAmt, currency)}
+              </div>
+              <div style={{ fontSize: 11, color: C.textMuted, marginTop: 4 }}>Due before work starts</div>
             </div>
-            <div style={{ background: "#12152e", borderRadius: 12, padding: 14, border: "1px solid #1e2140", textAlign: "center" }}>
-              <div style={{ fontSize: 11, color: "#8b9cf4", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>Remaining ({100 - advancePct}%)</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: "#a78bfa" }}>{fmt(remainingAmt, currency)}</div>
-              <div style={{ fontSize: 11, color: "#4a5080", marginTop: 4 }}>Due on delivery</div>
+            {/* Remaining */}
+            <div style={{
+              background: "rgba(124,58,237,0.06)",
+              borderRadius: 12, padding: 16,
+              border: "1px solid rgba(124,58,237,0.15)", textAlign: "center",
+            }}>
+              <div style={{ fontSize: 11, color: C.textMuted, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                Remaining ({100 - advancePct}%)
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: C.accentLight, letterSpacing: -0.5 }}>
+                {fmt(remainAmt, currency)}
+              </div>
+              <div style={{ fontSize: 11, color: C.textMuted, marginTop: 4 }}>Due on delivery</div>
             </div>
           </div>
         )}
@@ -56,12 +74,12 @@ export default function PaymentTerms({ answers, setAnswers }) {
             onChange={v => set("paymentDueDays", v)}
             placeholder="e.g. 7"
             type="number"
-            hint="e.g. 7 means client must pay within 7 days of receiving invoice"
+            hint="Client must pay within this many days of invoice"
           />
         </div>
       </Card>
 
-      {/* Accepted payment methods */}
+      {/* Methods */}
       <Card style={{ marginBottom: 16 }}>
         <CardTitle>Accepted Payment Methods</CardTitle>
         <CheckboxGroup

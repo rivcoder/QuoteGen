@@ -1,4 +1,4 @@
-import { SectionTitle, TextInput, Card } from "../components/UI";
+import { SectionTitle, TextInput, Card, C } from "../components/UI";
 import { validateEmail, validatePhone } from "../utils/calculate";
 
 export default function ClientInfo({ answers, setAnswers }) {
@@ -13,7 +13,7 @@ export default function ClientInfo({ answers, setAnswers }) {
       <SectionTitle sub="Who is this quote for?">Client Information</SectionTitle>
 
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#8b9cf4", marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: C.accentLight, marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>
           Client Details
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
@@ -38,8 +38,8 @@ export default function ClientInfo({ answers, setAnswers }) {
         </div>
       </Card>
 
-      <div style={{ fontSize: 12, color: "#3a3f6e", padding: "10px 14px", background: "#12152e", borderRadius: 10, border: "1px solid #1e2140" }}>
-        💡 All fields are optional — only filled fields appear on the PDF.
+      <div style={{ fontSize: 12, color: C.textMuted, padding: "10px 14px", background: C.surfaceHigh, borderRadius: 10, border: `1px solid ${C.surfaceBorder}`, display: "flex", alignItems: "center", gap: 8 }}>
+        <span>💡</span><span>All fields are optional — only filled fields appear on the PDF.</span>
       </div>
     </div>
   );

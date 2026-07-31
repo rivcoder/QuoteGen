@@ -1,14 +1,14 @@
-import { SectionTitle, Card, CardTitle, TextInput, Btn, Divider } from "../components/UI";
+import { SectionTitle, Card, CardTitle, TextInput, Btn, C } from "../components/UI";
 import { fmt, calculateQuote } from "../utils/calculate";
 
 function MilestoneRow({ milestone, index, onChange, onDelete }) {
   const set = (k, v) => onChange(index, { ...milestone, [k]: v });
   return (
-    <div style={{ background: "#12152e", borderRadius: 12, padding: 14, border: "1px solid #1e2140", marginBottom: 10 }}>
+    <div style={{ background: C.surfaceHigh, borderRadius: 12, padding: 14, border: `1px solid ${C.surfaceBorder}`, marginBottom: 10 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: "#6c63ff" }}>Milestone {index + 1}</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: C.accent }}>Milestone {index + 1}</div>
         <button onClick={() => onDelete(index)} style={{
-          background: "transparent", border: "1px solid #f87171", color: "#f87171",
+          background: "transparent", border: `1px solid ${C.danger}`, color: C.danger,
           borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontFamily: "inherit", fontSize: 11,
         }}>✕ Remove</button>
       </div>
@@ -70,29 +70,29 @@ export default function Milestones({ answers, setAnswers }) {
         <Card style={{ marginBottom: 16, border: isBalanced ? "1px solid #34d399" : "1px solid #f59e0b" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <div style={{ fontSize: 12, color: "#8b9cf4", marginBottom: 4 }}>Milestones total</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: isBalanced ? "#34d399" : "#f59e0b" }}>
+              <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 4 }}>Milestones total</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: isBalanced ? C.success : C.warning }}>
                 {fmt(milestonesTotal, currency)}
               </div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 12, color: "#8b9cf4", marginBottom: 4 }}>Quote total</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>{fmt(total, currency)}</div>
+              <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 4 }}>Quote total</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: C.text }}>{fmt(total, currency)}</div>
             </div>
           </div>
           {!isBalanced && (
-            <div style={{ marginTop: 10, fontSize: 12, color: "#f59e0b" }}>
+            <div style={{ marginTop: 10, fontSize: 12, color: C.warning }}>
               ⚠ {remaining > 0 ? `₹${Math.round(remaining).toLocaleString("en-IN")} unallocated` : `₹${Math.abs(Math.round(remaining)).toLocaleString("en-IN")} over total`}
             </div>
           )}
           {isBalanced && (
-            <div style={{ marginTop: 10, fontSize: 12, color: "#34d399" }}>✓ Milestones match quote total</div>
+            <div style={{ marginTop: 10, fontSize: 12, color: C.success }}>✓ Milestones match quote total</div>
           )}
         </Card>
       )}
 
       {milestones.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "32px 0", color: "#4a5080" }}>
+        <div style={{ textAlign: "center", padding: "32px 0", color: C.textMuted }}>
           <div style={{ fontSize: 36, marginBottom: 10 }}>🗓</div>
           <div style={{ fontWeight: 600, marginBottom: 6 }}>No milestones yet</div>
           <div style={{ fontSize: 13 }}>Break the project into phases with separate payment dates</div>

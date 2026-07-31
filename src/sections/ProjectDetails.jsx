@@ -1,4 +1,4 @@
-import { SectionTitle, TextInput, TextArea, SelectInput, CheckboxGroup, Card, Divider } from "../components/UI";
+import { SectionTitle, TextInput, TextArea, SelectInput, CheckboxGroup, Card, Divider, C } from "../components/UI";
 
 const CATEGORIES = [
   { value: "", label: "Select a category..." },
@@ -28,7 +28,7 @@ export default function ProjectDetails({ answers, setAnswers }) {
 
       {/* Basic Info */}
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#8b9cf4", marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>Basic Info</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: C.accentLight, marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>Basic Info</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <TextInput
             label="Project Name" value={answers.projectName || ""}
@@ -49,7 +49,7 @@ export default function ProjectDetails({ answers, setAnswers }) {
 
       {/* Dates */}
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#8b9cf4", marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>Timeline</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: C.accentLight, marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>Timeline</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <TextInput
             label="Start Date" value={answers.startDate || ""}
@@ -64,7 +64,7 @@ export default function ProjectDetails({ answers, setAnswers }) {
 
       {/* Platform */}
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#8b9cf4", marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>Target Platform</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: C.accentLight, marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>Target Platform</div>
         <CheckboxGroup
           options={PLATFORM_OPTIONS}
           selected={answers.platforms || []}
@@ -74,7 +74,7 @@ export default function ProjectDetails({ answers, setAnswers }) {
 
       {/* Scope */}
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#8b9cf4", marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>Scope of Work</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: C.accentLight, marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>Scope of Work</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <TextArea
             label="✅ Features Included" value={answers.scopeIncluded || ""}

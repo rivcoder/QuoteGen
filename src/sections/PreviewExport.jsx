@@ -274,7 +274,7 @@ function generatePortalLink(answers, quote, profile) {
   }
 }
 
-export default function PreviewExport({ answers, setAnswers, profile, onNew }) {
+export default function PreviewExport({ answers, setAnswers, profile, onNew, setActive }) {
   const currency = answers.currency || "INR";
   const [quoteId] = useState(() => answers.quoteId || generateQuoteId());
   const [copied, setCopied] = useState(false);
@@ -285,10 +285,17 @@ export default function PreviewExport({ answers, setAnswers, profile, onNew }) {
   const answersWithId = { ...answers, quoteId };
   const quote = calculateQuote(answersWithId);
   if (!quote) return (
-    <div style={{ padding: 40, textAlign: "center", color: "#4a5080" }}>
+    <div style={{ padding: 40, textAlign: "center", color: "#64748b" }}>
       <div style={{ fontSize: 36, marginBottom: 12 }}>⚠️</div>
-      <div style={{ fontWeight: 700, color: "#f87171" }}>No service selected</div>
-      <div style={{ marginTop: 8, fontSize: 13 }}>Go to the Pricing section and select a service first.</div>
+      <div style={{ fontWeight: 700, color: "#ef4444", fontSize: 16 }}>No service selected</div>
+      <div style={{ marginTop: 8, fontSize: 13, color: "#94a3b8", marginBottom: 20 }}>
+        Please select a service first in the Pricing section to view the preview.
+      </div>
+      {setActive && (
+        <Btn onClick={() => setActive("pricing")} variant="primary" style={{ padding: "8px 20px" }}>
+          Go to Pricing
+        </Btn>
+      )}
     </div>
   );
 
@@ -319,7 +326,7 @@ export default function PreviewExport({ answers, setAnswers, profile, onNew }) {
   };
 
   const handleSave = () => {
-    saveQuoteToHistory(answersWithId, quote, quoteId);
+    saveQuoteToHistory(answersWithId, quote, quoteId, answers.mode);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };

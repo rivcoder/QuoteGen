@@ -2,431 +2,334 @@ import { useState, useEffect } from "react";
 import { fmt } from "../utils/calculate";
 import logo from "../quotelogo.png";
 
-// ── Decode quote data from URL hash ──────────────────────────────────────────
 function decodeQuoteFromURL() {
   try {
-    const hash = window.location.hash.slice(1); // remove #
+    const hash = window.location.hash.slice(1);
     if (!hash) return null;
-    const json = decodeURIComponent(atob(hash));
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
+    return JSON.parse(decodeURIComponent(atob(hash)));
+  } catch { return null; }
 }
 
-// ── Status stored in localStorage per quoteId ─────────────────────────────────
-function getPortalStatus(quoteId) {
-  try { return JSON.parse(localStorage.getItem(`portal_${quoteId}`) || "null"); } catch { return null; }
+function getPortalStatus(id) {
+  try { return JSON.parse(localStorage.getItem(`portal_${id}`) || "null"); } catch { return null; }
 }
-function setPortalStatus(quoteId, status, note) {
-  try {
-    localStorage.setItem(`portal_${quoteId}`, JSON.stringify({
-      status, note, timestamp: new Date().toISOString(),
-    }));
-  } catch {}
+function setPortalStatus(id, status, note) {
+  try { localStorage.setItem(`portal_${id}`, JSON.stringify({ status, note, timestamp: new Date().toISOString() })); } catch {}
 }
 
-// ── Section block ─────────────────────────────────────────────────────────────
-function Section({ title, children }) {
-  return (
-    <div style={{ marginBottom: 28 }}>
-      <div style={{
-        fontSize: 11, fontWeight: 700, color: "#6c63ff",
-        textTransform: "uppercase", letterSpacing: 1.5,
-        marginBottom: 12, paddingBottom: 8,
-        borderBottom: "1px solid #f0eeff",
-      }}>
-        {title}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function InfoRow({ label, value }) {
+function Row({ label, value }) {
   if (!value) return null;
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f5f5ff" }}>
-      <span style={{ fontSize: 13, color: "#888" }}>{label}</span>
-      <span style={{ fontSize: 13, color: "#1a1a2e", fontWeight: 600 }}>{value}</span>
+    <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #1e2140", fontSize: 13 }}>
+      <span style={{ color: "#9ca3af" }}>{label}</span>
+      <span style={{ color: "#f3f4f6", fontWeight: 500 }}>{value}</span>
     </div>
   );
 }
 
-// ── Main portal ───────────────────────────────────────────────────────────────
 export default function ClientPortal() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
-  const [status, setStatus] = useState(null); // null | "accepted" | "rejected"
+  const [status, setStatus] = useState(null);
   const [note, setNote] = useState("");
-  const [showNoteBox, setShowNoteBox] = useState(false);
+  const [showNote, setShowNote] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     const decoded = decodeQuoteFromURL();
     if (!decoded) { setError(true); return; }
     setData(decoded);
-    // check if already responded
-    const existing = getPortalStatus(decoded.quoteId);
+    const existing = getPortalStatus(decoded.answers?.quoteId);
     if (existing) { setStatus(existing.status); setNote(existing.note || ""); setSubmitted(true); }
   }, []);
 
-  const handleDecision = (decision) => {
-    if (!data) return;
-    if (decision === "rejected") {
-      setShowNoteBox(true);
-      setStatus("rejected");
-      return;
-    }
-    finalSubmit("accepted", "");
-  };
-
   const finalSubmit = (decision, clientNote) => {
-    setPortalStatus(data.quoteId, decision, clientNote);
-    setStatus(decision);
-    setSubmitted(true);
-    setShowNoteBox(false);
+    setPortalStatus(data.answers?.quoteId, decision, clientNote);
+    setStatus(decision); setSubmitted(true); setShowNote(false);
   };
 
-  // ── Error state ────────────────────────────────────────────────────────────
   if (error) return (
-    <div style={pageStyle}>
-      <div style={cardStyle}>
-        <img src={logo} alt="QuoteGen" style={{ width: 80, marginBottom: 20, objectFit: "contain" }} />
-        <div style={{ fontSize: 20, fontWeight: 800, color: "#1a1a2e", marginBottom: 8 }}>Invalid Quote Link</div>
-        <div style={{ fontSize: 14, color: "#888", textAlign: "center" }}>
-          This link appears to be broken or expired. Please ask your freelancer to resend the quote.
-        </div>
-      </div>
+    <div style={center}>
+      <img src={logo} alt="QuoteGen" style={{ width: 48, marginBottom: 20, objectFit: "contain" }} />
+      <div style={{ fontSize: 16, fontWeight: 600, color: "#f87171", marginBottom: 6 }}>Invalid quote link</div>
+      <div style={{ fontSize: 13, color: "#9ca3af", textAlign: "center" }}>This link appears broken or expired. Ask your freelancer to resend it.</div>
     </div>
   );
 
-  if (!data) return (
-    <div style={pageStyle}>
-      <div style={{ color: "#888", fontSize: 14 }}>Loading quote...</div>
-    </div>
-  );
+  if (!data) return <div style={center}><div style={{ fontSize: 13, color: "#9ca3af" }}>Loading...</div></div>;
 
   const { answers, quote, profile, currency = "INR" } = data;
   const freelancer = profile?.company || profile?.name || answers.freelancerName || "Freelancer";
   const freelancerEmail = profile?.email || answers.freelancerEmail || "";
 
-  // ── Submitted state ────────────────────────────────────────────────────────
   if (submitted) return (
-    <div style={pageStyle}>
-      <div style={{ ...cardStyle, maxWidth: 480 }}>
-        <img src={logo} alt="QuoteGen" style={{ width: 70, marginBottom: 20, objectFit: "contain" }} />
-        <div style={{
-          width: 64, height: 64, borderRadius: "50%", marginBottom: 16,
-          background: status === "accepted" ? "#d1fae5" : "#fee2e2",
-          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28,
-        }}>
-          {status === "accepted" ? "✓" : "✕"}
-        </div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: "#1a1a2e", marginBottom: 8 }}>
-          {status === "accepted" ? "Quote Accepted!" : "Quote Rejected"}
-        </div>
-        <div style={{ fontSize: 14, color: "#888", textAlign: "center", lineHeight: 1.7, marginBottom: 20 }}>
-          {status === "accepted"
-            ? `Thank you! Your acceptance has been recorded. ${freelancer} will be in touch shortly to discuss next steps.`
-            : `Your feedback has been recorded. ${freelancer} will reach out to discuss your concerns.`
-          }
-        </div>
-        {note && (
-          <div style={{ background: "#f8f8ff", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#555", width: "100%", textAlign: "left" }}>
-            <div style={{ fontSize: 11, color: "#888", marginBottom: 4 }}>Your note:</div>
-            {note}
-          </div>
-        )}
-        {freelancerEmail && (
-          <div style={{ marginTop: 20, fontSize: 13, color: "#888" }}>
-            Questions? Email <a href={`mailto:${freelancerEmail}`} style={{ color: "#6c63ff" }}>{freelancerEmail}</a>
-          </div>
-        )}
+    <div style={center}>
+      <img src={logo} alt="QuoteGen" style={{ width: 48, marginBottom: 20, objectFit: "contain" }} />
+      <div style={{
+        width: 48, height: 48, borderRadius: "50%", marginBottom: 16,
+        background: status === "accepted" ? "#0d2e1f" : "#2e1212",
+        border: `1px solid ${status === "accepted" ? "#10b981" : "#f87171"}`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 20, color: status === "accepted" ? "#10b981" : "#f87171"
+      }}>
+        {status === "accepted" ? "✓" : "✕"}
       </div>
+      <div style={{ fontSize: 18, fontWeight: 700, color: "#f3f4f6", marginBottom: 6 }}>
+        {status === "accepted" ? "Quote accepted" : "Quote declined"}
+      </div>
+      <div style={{ fontSize: 13, color: "#9ca3af", textAlign: "center", lineHeight: 1.6, maxWidth: 320, marginBottom: 16 }}>
+        {status === "accepted"
+          ? `Your acceptance has been recorded. ${freelancer} will be in touch shortly.`
+          : `Your feedback has been recorded. ${freelancer} will reach out to discuss.`
+        }
+      </div>
+      {note && (
+        <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 6, padding: "10px 14px", fontSize: 13, color: "#9ca3af", maxWidth: 320, width: "100%" }}>
+          <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.4 }}>Your note</div>
+          {note}
+        </div>
+      )}
+      {freelancerEmail && (
+        <div style={{ marginTop: 20, fontSize: 12, color: "#6b7280" }}>
+          Questions? <a href={`mailto:${freelancerEmail}`} style={{ color: "#6c63ff" }}>{freelancerEmail}</a>
+        </div>
+      )}
     </div>
   );
 
-  // ── Main quote view ────────────────────────────────────────────────────────
   return (
-    <div style={{ background: "#f8f8ff", minHeight: "100vh", fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
+    <div style={{ background: "#080b1a", minHeight: "100vh", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
 
-      {/* Top bar */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #eee", padding: "14px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      {/* Header */}
+      <div style={{ background: "#0d1026", borderBottom: "1px solid #1e2140", padding: "14px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {profile?.logo && <img src={profile.logo} alt="logo" style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 6 }} />}
+          {profile?.logo
+            ? <img src={profile.logo} alt="logo" style={{ width: 28, height: 28, objectFit: "contain", borderRadius: 4 }} />
+            : <img src={logo} alt="QuoteGen" style={{ width: 28, height: 28, objectFit: "contain" }} />
+          }
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: "#1a1a2e" }}>{freelancer}</div>
-            {freelancerEmail && <div style={{ fontSize: 11, color: "#888" }}>{freelancerEmail}</div>}
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#f3f4f6" }}>{freelancer}</div>
+            {freelancerEmail && <div style={{ fontSize: 11, color: "#9ca3af" }}>{freelancerEmail}</div>}
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 11, color: "#888" }}>Quote ID</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#6c63ff", letterSpacing: 0.5 }}>{answers.quoteId}</div>
+          <div style={{ fontSize: 11, color: "#6b7280" }}>Quote ID</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#f3f4f6", fontVariantNumeric: "tabular-nums" }}>{answers.quoteId}</div>
         </div>
       </div>
 
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "32px 24px" }}>
+      <div style={{ maxWidth: 700, margin: "0 auto", padding: "32px 24px" }}>
 
         {/* Hero */}
-        <div style={{
-          background: "#fff", borderRadius: 20, padding: "32px",
-          marginBottom: 24, textAlign: "center",
-          border: "1px solid #eee",
-          boxShadow: "0 4px 24px rgba(108,99,255,0.08)",
-        }}>
-          <div style={{ fontSize: 12, color: "#6c63ff", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>
+        <div style={{ background: "linear-gradient(135deg,#0d1028,#12152e)", border: "1px solid #1e2140", borderRadius: 8, padding: "28px 24px", marginBottom: 16, textAlign: "center" }}>
+          <div style={{ fontSize: 11, color: "#6c63ff", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
             {answers.projectName || quote.serviceLabel}
           </div>
-          <div style={{ fontSize: 52, fontWeight: 900, color: "#1a1a2e", marginBottom: 4 }}>
+          <div style={{ fontSize: 44, fontWeight: 800, color: "#10b981", letterSpacing: -1, marginBottom: 4, fontVariantNumeric: "tabular-nums" }}>
             {fmt(quote.total, currency)}
           </div>
-          <div style={{ fontSize: 14, color: "#888" }}>
-            {quote.baseTypeLabel} · {quote.timeline}
-          </div>
+          <div style={{ fontSize: 13, color: "#9ca3af", marginBottom: 4 }}>{quote.baseTypeLabel} · {quote.timeline}</div>
           {answers.clientName && (
-            <div style={{ fontSize: 13, color: "#6c63ff", marginTop: 6 }}>
-              Prepared for: <strong>{answers.clientName}</strong>
-              {answers.clientCompany ? ` · ${answers.clientCompany}` : ""}
+            <div style={{ fontSize: 13, color: "#9ca3af" }}>
+              Prepared for <strong>{answers.clientName}</strong>{answers.clientCompany ? ` · ${answers.clientCompany}` : ""}
             </div>
           )}
-          <div style={{
-            display: "inline-block", marginTop: 12,
-            background: "#fff8e1", border: "1px solid #ffd54f",
-            borderRadius: 8, padding: "6px 14px",
-            fontSize: 12, color: "#7c5c00",
-          }}>
-            ⏳ Valid until {quote.validUntil}
+          <div style={{ marginTop: 12, display: "inline-block", background: "#0d1026", border: "1px solid #1e2140", borderRadius: 4, padding: "4px 12px", fontSize: 12, color: "#9ca3af" }}>
+            Valid until {quote.validUntil}
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+
           {/* Breakdown */}
-          <div style={whiteCard}>
-            <Section title="Price Breakdown">
-              <InfoRow label={`Base — ${quote.baseTypeLabel}`} value={fmt(quote.basePrice, currency)} />
-              {quote.pagesCost > 0 && <InfoRow label="Pages" value={`+${fmt(quote.pagesCost, currency)}`} />}
-              {quote.selectedAddons.map((a, i) => (
-                <InfoRow key={i} label={`${a.icon} ${a.label}`} value={`+${fmt(a.cost, currency)}`} />
-              ))}
-              {quote.lineItemTotal > 0 && <InfoRow label="Line items" value={`+${fmt(quote.lineItemTotal, currency)}`} />}
-              <div style={{ borderTop: "2px solid #f0eeff", marginTop: 8, paddingTop: 8 }}>
-                <InfoRow label="Subtotal" value={fmt(quote.subtotal, currency)} />
-                {quote.discount > 0 && <InfoRow label={`Discount (${quote.discountPct}%)`} value={`−${fmt(quote.discount, currency)}`} />}
-                {quote.gst > 0 && <InfoRow label="GST (18%)" value={`+${fmt(quote.gst, currency)}`} />}
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, padding: "10px 0" }}>
-                <span style={{ fontWeight: 800, fontSize: 15, color: "#1a1a2e" }}>Total</span>
-                <span style={{ fontWeight: 900, fontSize: 18, color: "#6c63ff" }}>{fmt(quote.total, currency)}</span>
-              </div>
-            </Section>
+          <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 8, padding: "20px" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#6c63ff", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>Price Breakdown</div>
+            <Row label={`Base — ${quote.baseTypeLabel}`} value={fmt(quote.basePrice, currency)} />
+            {quote.pagesCost > 0 && <Row label="Pages" value={`+${fmt(quote.pagesCost, currency)}`} />}
+            {quote.selectedAddons.map((a, i) => <Row key={i} label={`${a.icon} ${a.label}`} value={`+${fmt(a.cost, currency)}`} />)}
+            {quote.lineItemTotal > 0 && <Row label="Line items" value={`+${fmt(quote.lineItemTotal, currency)}`} />}
+            {quote.discount > 0 && <Row label={`Discount (${quote.discountPct}%)`} value={`−${fmt(quote.discount, currency)}`} />}
+            {quote.gst > 0 && <Row label="GST (18%)" value={`+${fmt(quote.gst, currency)}`} />}
+            <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, marginTop: 4 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#f3f4f6" }}>Total</span>
+              <span style={{ fontSize: 16, fontWeight: 800, color: "#10b981", fontVariantNumeric: "tabular-nums" }}>{fmt(quote.total, currency)}</span>
+            </div>
           </div>
 
-          {/* Payment + tiers */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={whiteCard}>
-              <Section title="Payment Schedule">
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <div style={{ background: "#f0fdf4", borderRadius: 10, padding: "12px 14px" }}>
-                    <div style={{ fontSize: 11, color: "#16a34a", fontWeight: 700, marginBottom: 2 }}>Advance ({quote.advancePct}%)</div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#16a34a" }}>{fmt(quote.advanceAmount, currency)}</div>
-                    <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>Due before work starts</div>
-                  </div>
-                  <div style={{ background: "#f5f3ff", borderRadius: 10, padding: "12px 14px" }}>
-                    <div style={{ fontSize: 11, color: "#6c63ff", fontWeight: 700, marginBottom: 2 }}>On Delivery ({100 - quote.advancePct}%)</div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#6c63ff" }}>{fmt(quote.remainingAmount, currency)}</div>
-                    <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>Due on completion</div>
-                  </div>
+            {/* Payment */}
+            <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 8, padding: "20px" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#6c63ff", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>Payment</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ background: "#0d1026", borderRadius: 6, padding: "10px 12px", border: "1px solid #1e2140" }}>
+                  <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Advance ({quote.advancePct}%)</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: "#34d399", fontVariantNumeric: "tabular-nums" }}>{fmt(quote.advanceAmount, currency)}</div>
                 </div>
-                {answers.paymentDetails && (
-                  <div style={{ marginTop: 10, fontSize: 12, color: "#555" }}>
-                    <strong>Pay via:</strong> {answers.paymentDetails}
-                  </div>
-                )}
-              </Section>
+                <div style={{ background: "#0d1026", borderRadius: 6, padding: "10px 12px", border: "1px solid #1e2140" }}>
+                  <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>On Delivery ({100 - quote.advancePct}%)</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: "#a78bfa", fontVariantNumeric: "tabular-nums" }}>{fmt(quote.remainingAmount, currency)}</div>
+                </div>
+              </div>
+              {answers.paymentDetails && (
+                <div style={{ marginTop: 10, fontSize: 12, color: "#9ca3af" }}>Pay via: {answers.paymentDetails}</div>
+              )}
             </div>
 
-            <div style={whiteCard}>
-              <Section title="Package Options">
-                {quote.tierComparison.map(tier => (
-                  <div key={tier.key} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "8px 10px", borderRadius: 8, marginBottom: 6,
-                    background: tier.key === "standard" ? "#f5f3ff" : "#fafafa",
-                    border: `1px solid ${tier.key === "standard" ? "#c4b5fd" : "#eee"}`,
-                  }}>
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: tier.color }}>{tier.label}</div>
-                      <div style={{ fontSize: 10, color: "#888" }}>{tier.desc}</div>
-                    </div>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: "#1a1a2e" }}>{fmt(tier.total, currency)}</div>
+            {/* Packages */}
+            <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 8, padding: "20px" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#6c63ff", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>Package Options</div>
+              {quote.tierComparison.map(t => (
+                <div key={t.key} style={{
+                  display: "flex", justifyContent: "space-between",
+                  padding: "7px 10px", borderRadius: 5, marginBottom: 5,
+                  background: t.key === "standard" ? "#0d1026" : "transparent",
+                  border: `1px solid ${t.key === "standard" ? "#1e2140" : "transparent"}`,
+                }}>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#f3f4f6" }}>{t.label}</div>
+                    <div style={{ fontSize: 11, color: "#9ca3af" }}>{t.desc}</div>
                   </div>
-                ))}
-              </Section>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#f3f4f6", fontVariantNumeric: "tabular-nums" }}>{fmt(t.total, currency)}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Project details */}
         {(answers.projectDescription || answers.scopeIncluded || answers.scopeExcluded || answers.deliverables) && (
-          <div style={{ ...whiteCard, marginBottom: 20 }}>
-            <Section title="Project Details">
-              {answers.projectDescription && (
-                <p style={{ fontSize: 14, color: "#444", lineHeight: 1.7, marginBottom: 16 }}>{answers.projectDescription}</p>
-              )}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                {answers.startDate && <InfoRow label="Start Date" value={answers.startDate} />}
-                {answers.endDate && <InfoRow label="Est. Completion" value={answers.endDate} />}
+          <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 8, padding: "20px", marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#6c63ff", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>Project Details</div>
+            {answers.projectDescription && <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.7, marginBottom: 14 }}>{answers.projectDescription}</p>}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              {answers.startDate && <div><div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Start</div><div style={{ fontSize: 13, color: "#f3f4f6" }}>{answers.startDate}</div></div>}
+              {answers.endDate && <div><div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Est. Completion</div><div style={{ fontSize: 13, color: "#f3f4f6" }}>{answers.endDate}</div></div>}
+            </div>
+            {answers.scopeIncluded && (
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontSize: 11, color: "#10b981", fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.4 }}>Included</div>
+                <div style={{ fontSize: 13, color: "#9ca3af", whiteSpace: "pre-wrap", lineHeight: 1.7, background: "#0d1026", border: "1px solid #1e2140", borderRadius: 5, padding: "10px 12px" }}>{answers.scopeIncluded}</div>
               </div>
-              {answers.scopeIncluded && (
-                <div style={{ marginTop: 14 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#16a34a", marginBottom: 6 }}>✅ Included</div>
-                  <div style={{ fontSize: 13, color: "#444", whiteSpace: "pre-wrap", lineHeight: 1.7, background: "#f0fdf4", borderRadius: 8, padding: "10px 14px" }}>{answers.scopeIncluded}</div>
-                </div>
-              )}
-              {answers.scopeExcluded && (
-                <div style={{ marginTop: 14 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#dc2626", marginBottom: 6 }}>❌ Not Included</div>
-                  <div style={{ fontSize: 13, color: "#444", whiteSpace: "pre-wrap", lineHeight: 1.7, background: "#fef2f2", borderRadius: 8, padding: "10px 14px" }}>{answers.scopeExcluded}</div>
-                </div>
-              )}
-              {answers.deliverables && (
-                <div style={{ marginTop: 14 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#6c63ff", marginBottom: 6 }}>📦 Deliverables</div>
-                  <div style={{ fontSize: 13, color: "#444", whiteSpace: "pre-wrap", lineHeight: 1.7, background: "#f5f3ff", borderRadius: 8, padding: "10px 14px" }}>{answers.deliverables}</div>
-                </div>
-              )}
-            </Section>
+            )}
+            {answers.scopeExcluded && (
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize: 11, color: "#f87171", fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.4 }}>Not Included</div>
+                <div style={{ fontSize: 13, color: "#9ca3af", whiteSpace: "pre-wrap", lineHeight: 1.7, background: "#0d1026", border: "1px solid #1e2140", borderRadius: 5, padding: "10px 12px" }}>{answers.scopeExcluded}</div>
+              </div>
+            )}
+            {answers.deliverables && (
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.4 }}>Deliverables</div>
+                <div style={{ fontSize: 13, color: "#9ca3af", whiteSpace: "pre-wrap", lineHeight: 1.7, background: "#0d1026", border: "1px solid #1e2140", borderRadius: 5, padding: "10px 12px" }}>{answers.deliverables}</div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Features */}
         {quote.selectedAddons.length > 0 && (
-          <div style={{ ...whiteCard, marginBottom: 20 }}>
-            <Section title="Included Features">
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {quote.selectedAddons.map((a, i) => (
-                  <span key={i} style={{ background: "#f0eeff", color: "#6c63ff", borderRadius: 99, padding: "5px 12px", fontSize: 12, fontWeight: 600 }}>
-                    {a.icon} {a.label}
-                  </span>
-                ))}
-              </div>
-            </Section>
+          <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 8, padding: "20px", marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#6c63ff", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>Included Features</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {quote.selectedAddons.map((a, i) => (
+                <span key={i} style={{ background: "#0d1026", border: "1px solid #1e2140", borderRadius: 4, padding: "4px 10px", fontSize: 12, color: "#9ca3af" }}>
+                  {a.icon} {a.label}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 
         {/* Milestones */}
         {(answers.milestones || []).length > 0 && (
-          <div style={{ ...whiteCard, marginBottom: 20 }}>
-            <Section title="Project Milestones">
-              {answers.milestones.map((m, i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < answers.milestones.length - 1 ? "1px solid #f0f0f0" : "none" }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "#1a1a2e" }}>{m.name || `Milestone ${i + 1}`}</div>
-                    {m.date && <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>Due: {m.date}</div>}
-                    {m.description && <div style={{ fontSize: 12, color: "#888" }}>{m.description}</div>}
-                  </div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#6c63ff" }}>
-                    {m.amount ? fmt(parseFloat(m.amount), currency) : "—"}
-                  </div>
+          <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 8, padding: "20px", marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#6c63ff", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>Milestones</div>
+            {answers.milestones.map((m, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: i < answers.milestones.length - 1 ? "1px solid #1e2140" : "none" }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: "#f3f4f6" }}>{m.name || `Milestone ${i + 1}`}</div>
+                  {m.date && <div style={{ fontSize: 11, color: "#9ca3af" }}>{m.date}</div>}
                 </div>
-              ))}
-            </Section>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#a78bfa", fontVariantNumeric: "tabular-nums" }}>
+                  {m.amount ? fmt(parseFloat(m.amount), currency) : "—"}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
         {/* Terms */}
         {answers.termsText && (
-          <div style={{ ...whiteCard, marginBottom: 24 }}>
-            <Section title="Terms & Conditions">
-              <div style={{ fontSize: 12, color: "#555", lineHeight: 1.9, whiteSpace: "pre-wrap", background: "#f8f8ff", borderRadius: 10, padding: "14px 16px" }}>
-                {answers.termsText}
-              </div>
-            </Section>
+          <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 8, padding: "20px", marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#6c63ff", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>Terms & Conditions</div>
+            <div style={{ fontSize: 12, color: "#9ca3af", lineHeight: 1.9, whiteSpace: "pre-wrap", background: "#0d1026", border: "1px solid #1e2140", borderRadius: 5, padding: "12px 14px" }}>
+              {answers.termsText}
+            </div>
           </div>
         )}
 
         {/* Accept / Reject */}
-        <div style={{ ...whiteCard, textAlign: "center", border: "2px solid #6c63ff22" }}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: "#1a1a2e", marginBottom: 6 }}>
-            Ready to proceed?
-          </div>
-          <div style={{ fontSize: 13, color: "#888", marginBottom: 24 }}>
+        <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 8, padding: "24px", textAlign: "center" }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: "#f3f4f6", marginBottom: 4 }}>Ready to proceed?</div>
+          <div style={{ fontSize: 13, color: "#9ca3af", marginBottom: 24 }}>
             Review the quote above and let {freelancer} know your decision.
           </div>
 
-          {showNoteBox ? (
-            <div>
+          {showNote ? (
+            <div style={{ textAlign: "left" }}>
               <textarea
                 value={note}
                 onChange={e => setNote(e.target.value)}
-                placeholder="Tell us what you'd like changed or why you're rejecting..."
-                rows={4}
+                placeholder="Tell us what you'd like changed..."
+                rows={3}
                 style={{
-                  width: "100%", padding: "12px 14px", borderRadius: 10,
-                  border: "1.5px solid #e5e7eb", fontSize: 13,
-                  fontFamily: "inherit", resize: "vertical", marginBottom: 12,
-                  boxSizing: "border-box", outline: "none",
+                  width: "100%", padding: "9px 11px", borderRadius: 5,
+                  border: "1px solid #1e2140", background: "#0d1026", color: "#f3f4f6", fontSize: 13,
+                  fontFamily: "inherit", resize: "vertical",
+                  marginBottom: 10, boxSizing: "border-box", outline: "none",
                 }}
               />
-              <div style={{ display: "flex", gap: 10 }}>
-                <button onClick={() => { setShowNoteBox(false); setStatus(null); }} style={ghostBtn}>
-                  Cancel
-                </button>
-                <button onClick={() => finalSubmit("rejected", note)} style={rejectBtn}>
-                  Submit Rejection
-                </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => { setShowNote(false); setStatus(null); }} style={ghostBtn}>Cancel</button>
+                <button onClick={() => finalSubmit("rejected", note)} style={rejectBtn}>Submit</button>
               </div>
             </div>
           ) : (
-            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-              <button onClick={() => handleDecision("rejected")} style={rejectBtn}>
-                ✕ Reject Quote
-              </button>
-              <button onClick={() => handleDecision("accepted")} style={acceptBtn}>
-                ✓ Accept Quote
-              </button>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+              <button onClick={() => { setStatus("rejected"); setShowNote(true); }} style={rejectBtn}>Decline</button>
+              <button onClick={() => finalSubmit("accepted", "")} style={acceptBtn}>Accept Quote</button>
             </div>
           )}
         </div>
 
-        <div style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "#bbb" }}>
-          Powered by QuoteGen · Billing. Made Simple.
+        <div style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "#6b7280" }}>
+          Powered by QuoteGen
         </div>
       </div>
     </div>
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
-const pageStyle = {
-  minHeight: "100vh", background: "#f8f8ff",
-  display: "flex", alignItems: "center", justifyContent: "center",
-  fontFamily: "'Segoe UI', system-ui, sans-serif", padding: 24,
-};
-const cardStyle = {
-  background: "#fff", borderRadius: 20, padding: 40,
-  textAlign: "center", boxShadow: "0 4px 40px rgba(0,0,0,0.08)",
-  display: "flex", flexDirection: "column", alignItems: "center", maxWidth: 400,
-};
-const whiteCard = {
-  background: "#fff", borderRadius: 16, padding: "24px",
-  border: "1px solid #eee", boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+const center = {
+  minHeight: "100vh", background: "#080b1a",
+  display: "flex", flexDirection: "column",
+  alignItems: "center", justifyContent: "center",
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  padding: 24,
 };
 const acceptBtn = {
-  padding: "14px 32px", borderRadius: 12, border: "none",
+  padding: "10px 24px", borderRadius: 6, border: "none",
   background: "linear-gradient(135deg,#6c63ff,#a78bfa)", color: "#fff",
-  fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+  fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+  boxShadow: "0 0 15px rgba(108, 99, 255, 0.3)"
 };
 const rejectBtn = {
-  padding: "14px 32px", borderRadius: 12,
-  border: "1.5px solid #f87171", background: "transparent",
-  color: "#f87171", fontSize: 15, fontWeight: 700,
-  cursor: "pointer", fontFamily: "inherit",
+  padding: "10px 24px", borderRadius: 6, border: "1px solid #1e2140",
+  background: "#12152e", color: "#f87171", fontSize: 14, fontWeight: 600,
+  cursor: "pointer", fontFamily: "inherit"
 };
-const ghostBtn = {
-  flex: 1, padding: "12px", borderRadius: 10,
-  border: "1.5px solid #e5e7eb", background: "transparent",
-  color: "#888", fontSize: 13, fontWeight: 600,
-  cursor: "pointer", fontFamily: "inherit",
+const ghostBtn  = {
+  flex: 1, padding: "9px", borderRadius: 6, border: "1px solid #1e2140",
+  background: "transparent", color: "#9ca3af", fontSize: 13, cursor: "pointer",
+  fontFamily: "inherit"
 };

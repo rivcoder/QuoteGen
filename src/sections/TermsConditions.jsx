@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SectionTitle, TextArea, Card, CardTitle, Btn, Toggle } from "../components/UI";
+import { SectionTitle, TextArea, Card, CardTitle, Btn, Toggle, C } from "../components/UI";
 
 const DEFAULT_TERMS = (answers) => {
   const freelancer = answers.freelancerName || "The Freelancer";
@@ -103,8 +103,8 @@ export default function TermsConditions({ answers, setAnswers }) {
           checked={answers.includeApproval !== false}
           onChange={v => set("includeApproval", v)}
         />
-        <div style={{ marginTop: 14, fontSize: 12, color: "#3a3f6e", lineHeight: 1.7, padding: "10px 14px", background: "#12152e", borderRadius: 10, border: "1px solid #1e2140" }}>
-          💡 The approval section includes: client name, date, and a signature line. For legally binding contracts, consider a proper eSign service like DocuSign or SignNow.
+        <div style={{ marginTop: 14, fontSize: 12, color: C.textMuted, lineHeight: 1.7, padding: "10px 14px", background: C.surfaceHigh, borderRadius: 10, border: `1px solid ${C.surfaceBorder}`, display: "flex", alignItems: "flex-start", gap: 8 }}>
+          <span>💡</span><span>The approval section includes: client name, date, and a signature line. For legally binding contracts, consider a proper eSign service like DocuSign or SignNow.</span>
         </div>
       </Card>
     </div>

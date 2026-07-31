@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SectionTitle, Card, CardTitle, TextInput, Btn } from "../components/UI";
+import { SectionTitle, Card, CardTitle, TextInput, Btn, C } from "../components/UI";
 import { getTemplates, saveTemplate, deleteTemplate } from "../utils/calculate";
 
 export default function Templates({ answers, setAnswers, onLoad }) {
@@ -56,14 +56,14 @@ export default function Templates({ answers, setAnswers, onLoad }) {
             {saved ? "✓ Saved!" : "Save"}
           </Btn>
         </div>
-        <div style={{ fontSize: 11, color: "#3a3f6e", marginTop: 8 }}>
+        <div style={{ fontSize: 11, color: C.textMuted, marginTop: 8 }}>
           Saves all current selections — service, add-ons, pricing, terms. Max 15 templates stored.
         </div>
       </Card>
 
       {/* Template list */}
       {templates.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "32px 0", color: "#4a5080" }}>
+        <div style={{ textAlign: "center", padding: "32px 0", color: C.textMuted }}>
           <div style={{ fontSize: 36, marginBottom: 10 }}>📋</div>
           <div style={{ fontWeight: 600, marginBottom: 6 }}>No templates yet</div>
           <div style={{ fontSize: 13 }}>Save your first template above to reuse it later</div>
@@ -75,13 +75,13 @@ export default function Templates({ answers, setAnswers, onLoad }) {
             {templates.map((t) => (
               <div key={t.name} style={{
                 display: "flex", alignItems: "center", gap: 12,
-                background: "#12152e", borderRadius: 12, padding: "12px 16px",
-                border: "1px solid #1e2140",
+                background: C.surfaceHigh, borderRadius: 12, padding: "12px 16px",
+                border: `1px solid ${C.surfaceBorder}`,
               }}>
                 <div style={{ fontSize: 22 }}>📋</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{t.name}</div>
-                  <div style={{ fontSize: 11, color: "#4a5080" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 2 }}>{t.name}</div>
+                  <div style={{ fontSize: 11, color: C.textMuted }}>
                     {t.answers?.service ? t.answers.service.charAt(0).toUpperCase() + t.answers.service.slice(1) : "—"}
                     {" · "}Saved {formatDate(t.savedAt)}
                   </div>

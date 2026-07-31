@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { SERVICES, TIMELINE } from "../data/pricing";
+import { SERVICES as DEFAULT_SERVICES, TIMELINE as DEFAULT_TIMELINE } from "../data/pricing";
+import { getPricingForMode } from "../data/pricingLoader";
 import { calculateQuote, fmt } from "../utils/calculate";
 import {
   SectionTitle, TextInput, SelectInput, ChoiceCard, FeatureToggle,
-  Toggle, Card, CardTitle, Btn, PriceRow, Divider, Slider
+  Toggle, Card, CardTitle, Btn, PriceRow, Divider, Slider, C
 } from "../components/UI";
 
 const LINE_ITEM_TYPES = [
@@ -16,7 +17,7 @@ const LINE_ITEM_TYPES = [
 function LineItemRow({ item, index, onChange, onDelete }) {
   const set = (k, v) => onChange(index, { ...item, [k]: v });
   return (
-    <div style={{ background: "#12152e", borderRadius: 12, padding: 14, border: "1px solid #1e2140", marginBottom: 10 }}>
+    <div style={{ background: C.surfaceHigh, borderRadius: 12, padding: 14, border: `1px solid ${C.surfaceBorder}`, marginBottom: 10 }}>
       <div style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "center" }}>
         <SelectInput
           value={item.type}
@@ -24,7 +25,7 @@ function LineItemRow({ item, index, onChange, onDelete }) {
           options={LINE_ITEM_TYPES}
         />
         <button onClick={() => onDelete(index)} style={{
-          background: "transparent", border: "1px solid #f87171", color: "#f87171",
+          background: "transparent", border: `1px solid ${C.danger}`, color: C.danger,
           borderRadius: 8, padding: "8px 12px", cursor: "pointer", fontFamily: "inherit",
           fontSize: 12, fontWeight: 700, flexShrink: 0,
         }}>✕</button>
@@ -54,7 +55,7 @@ function LineItemRow({ item, index, onChange, onDelete }) {
       </div>
 
       {/* Line item subtotal */}
-      <div style={{ marginTop: 10, textAlign: "right", fontSize: 13, color: "#a78bfa", fontWeight: 700 }}>
+      <div style={{ marginTop: 10, textAlign: "right", fontSize: 13, color: C.accentLight, fontWeight: 700 }}>
         = ₹{getLineItemTotal(item).toLocaleString("en-IN")}
       </div>
     </div>
@@ -67,7 +68,8 @@ function getLineItemTotal(item) {
   return parseFloat(item.amount) || 0;
 }
 
-export default function PricingSection({ answers, setAnswers }) {
+export default function PricingSection({ answers, setAnswers, mode }) {
+  const { SERVICES, TIMELINE } = getPricingForMode(mode || "freelancer");
   const set = (k, v) => setAnswers(a => ({ ...a, [k]: v }));
   const service = SERVICES[answers.service];
   const currency = answers.currency || "INR";
@@ -199,7 +201,7 @@ export default function PricingSection({ answers, setAnswers }) {
       {/* Custom line items */}
       <Card style={{ marginBottom: 16 }}>
         <CardTitle>Additional Line Items</CardTitle>
-        <div style={{ fontSize: 12, color: "#4a5080", marginBottom: 14 }}>
+        <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 14 }}>
           Mix hourly, fixed, and quantity items on top of your base service.
         </div>
         {lineItems.map((item, i) => (
@@ -238,14 +240,14 @@ export default function PricingSection({ answers, setAnswers }) {
 
       {/* Live total */}
       {quote && (
-        <Card style={{ border: "1px solid #3b3f8c" }}>
+        <Card style={{ border: `1px solid rgba(124,58,237,0.3)`, boxShadow: `0 0 20px rgba(124,58,237,0.08)` }}>
           <CardTitle>Live Total</CardTitle>
           <PriceRow label="Base service" value={fmt(quote.basePrice + quote.pagesCost, currency)} />
-          {quote.addonTotal > 0 && <PriceRow label={`Add-ons (${quote.selectedAddons.length})`} value={`+${fmt(quote.addonTotal + quote.revisionCost, currency)}`} color="#a78bfa" />}
-          {quote.lineItemTotal > 0 && <PriceRow label="Line items" value={`+${fmt(quote.lineItemTotal, currency)}`} color="#a78bfa" />}
+          {quote.addonTotal > 0 && <PriceRow label={`Add-ons (${quote.selectedAddons.length})`} value={`+${fmt(quote.addonTotal + quote.revisionCost, currency)}`} color={C.accentLight} />}
+          {quote.lineItemTotal > 0 && <PriceRow label="Line items" value={`+${fmt(quote.lineItemTotal, currency)}`} color={C.accentLight} />}
           <Divider style={{ margin: "10px 0" }} />
           <PriceRow label="Subtotal" value={fmt(quote.subtotal, currency)} bold />
-          {quote.discount > 0 && <PriceRow label={`Discount (${quote.discountPct}%)`} value={`−${fmt(quote.discount, currency)}`} color="#34d399" />}
+          {quote.discount > 0 && <PriceRow label={`Discount (${quote.discountPct}%)`} value={`−${fmt(quote.discount, currency)}`} color={C.success} />}
           {quote.gst > 0 && <PriceRow label="GST (18%)" value={`+${fmt(quote.gst, currency)}`} />}
           <Divider style={{ margin: "10px 0" }} />
           <PriceRow label="Total" value={fmt(quote.total, currency)} bold big />
