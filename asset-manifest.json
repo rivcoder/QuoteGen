@@ -1,0 +1,11 @@
+{
+  "files": {
+    "main.js": "/QuoteGen/static/js/main.c9d3de17.js",
+    "static/media/quotelogo.png": "/QuoteGen/static/media/quotelogo.403ec5072967aa86fe4e.png",
+    "index.html": "/QuoteGen/index.html",
+    "main.c9d3de17.js.map": "/QuoteGen/static/js/main.c9d3de17.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.c9d3de17.js"
+  ]
+}
