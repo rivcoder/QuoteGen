@@ -50,7 +50,7 @@ export default function ProjectDetails({ answers, setAnswers }) {
       {/* Dates */}
       <Card style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: C.accentLight, marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>Timeline</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div className="grid-2-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <TextInput
             label="Start Date" value={answers.startDate || ""}
             onChange={v => set("startDate", v)} type="date"

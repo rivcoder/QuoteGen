@@ -105,7 +105,7 @@ export default function FreelancerProfile({ profile, setProfile }) {
       {/* Personal Info */}
       <Card style={{ marginBottom: 16 }}>
         <CardTitle>Personal / Agency Info</CardTitle>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div className="grid-2-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <TextInput label="Your Full Name"         value={form.name}    onChange={v => set("name", v)}    placeholder="Aryan Sharma" />
           <TextInput label="Company / Agency Name"  value={form.company} onChange={v => set("company", v)} placeholder="Aryan Dev Studio" />
           <TextInput label="Email"  type="email"    value={form.email}   onChange={v => set("email", v)}   placeholder="you@email.com" />

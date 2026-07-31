@@ -3,6 +3,7 @@ import { loadFreelancerProfile, getPIN } from "./utils/calculate";
 import { MODE_LABELS, MODE_ICONS, findModeForService } from "./data/pricingLoader";
 import { ErrorBoundaryFallback, C } from "./components/UI";
 import logo from "./quotelogo.png";
+import "./responsive.css";
 
 import ClientPortal from "./components/ClientPortal";
 import Splash from "./components/Splash";
@@ -71,6 +72,7 @@ export default function App() {
     mode: savedMode || "freelancer",
   }));
   const [profile, setProfile] = useState(() => loadFreelancerProfile());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleSplashDone = () => {
     if (storedPIN)  { setScreen("pin_enter"); return; }
@@ -84,7 +86,7 @@ export default function App() {
     setAnswers(a => ({ ...a, mode: m }));
     setScreen("app");
   };
-  const handleNewQuote       = () => { setAnswers({ ...DEFAULT_ANSWERS, mode }); setActive("client"); };
+  const handleNewQuote       = () => { setAnswers({ ...DEFAULT_ANSWERS, mode }); setActive("client"); setSidebarOpen(false); };
   const handleLoadTemplate   = (ta) => {
     const nm = ta.mode || findModeForService(ta.service) || mode;
     if (nm && nm !== mode) { localStorage.setItem(MODE_KEY, nm); setMode(nm); }
@@ -146,8 +148,23 @@ export default function App() {
         bottom: -100, right: 100, pointerEvents: "none", zIndex: 0,
       }} />
 
+      {/* Sidebar Backdrop (only shown on mobile when open) */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)} 
+          style={{
+            position: "fixed",
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(4px)",
+            WebkitBackdropFilter: "blur(4px)",
+            zIndex: 90,
+          }} 
+        />
+      )}
+
       {/* ─── Sidebar ─────────────────────────────────────────────────────────── */}
-      <aside style={{
+      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`} style={{
         width: 232, flexShrink: 0,
         background: C.surface,
         borderRight: `1px solid ${C.surfaceBorder}`,
@@ -172,7 +189,7 @@ export default function App() {
           </div>
 
           {/* Mode Switcher */}
-          <button onClick={() => setScreen("mode")} style={{
+          <button onClick={() => { setScreen("mode"); setSidebarOpen(false); }} style={{
             width: "100%", padding: "8px 10px", borderRadius: 8,
             border: `1px solid ${C.surfaceBorder}`, background: C.surfaceHigh,
             cursor: "pointer", fontFamily: ff, display: "flex",
@@ -225,7 +242,7 @@ export default function App() {
                 {items.map(item => {
                   const isActive = active === item.id;
                   return (
-                    <button key={item.id} onClick={() => setActive(item.id)} style={{
+                    <button key={item.id} onClick={() => { setActive(item.id); setSidebarOpen(false); }} style={{
                       width: "100%", display: "flex", alignItems: "center", gap: 9,
                       padding: "8px 10px", borderRadius: 8, border: "none",
                       background: isActive ? "rgba(124,58,237,0.14)" : "transparent",
@@ -253,7 +270,7 @@ export default function App() {
 
         {/* Bottom lock */}
         <div style={{ padding: "12px 14px 16px", borderTop: `1px solid ${C.surfaceBorder}` }}>
-          <button onClick={() => setScreen("pin_enter")} style={{
+          <button onClick={() => { setScreen("pin_enter"); setSidebarOpen(false); }} style={{
             width: "100%", padding: "7px 0", borderRadius: 8,
             border: `1px solid ${C.surfaceBorder}`, background: "transparent",
             color: C.textMuted, fontSize: 12, fontWeight: 500,
@@ -275,7 +292,7 @@ export default function App() {
       <main style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, position: "relative", zIndex: 1 }}>
 
         {/* Topbar */}
-        <header style={{
+        <header className="topbar" style={{
           padding: "0 32px", height: 56,
           background: `${C.surface}cc`,
           backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
@@ -283,11 +300,35 @@ export default function App() {
           display: "flex", alignItems: "center", justifyContent: "space-between",
           position: "sticky", top: 0, zIndex: 15, flexShrink: 0,
         }}>
-          {/* Breadcrumb */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 500 }}>QuoteGen</span>
-            <span style={{ color: C.textMuted, fontSize: 10 }}>›</span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{currentNav?.label}</span>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {/* Burger Menu Button (Visible on mobile) */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="burger-btn"
+              style={{
+                background: "transparent",
+                border: "none",
+                color: C.text,
+                cursor: "pointer",
+                padding: 6,
+                marginRight: 10,
+                display: "none",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+
+            {/* Breadcrumb */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 500 }}>QuoteGen</span>
+              <span style={{ color: C.textMuted, fontSize: 10 }}>›</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{currentNav?.label}</span>
             {answers.projectName && (
               <>
                 <span style={{ color: C.textMuted, fontSize: 10 }}>›</span>
@@ -300,6 +341,7 @@ export default function App() {
                 </span>
               </>
             )}
+            </div>
           </div>
 
           {/* Progress + Nav */}
@@ -348,7 +390,7 @@ export default function App() {
         </header>
 
         {/* Content */}
-        <div style={{
+        <div className="content-inner" style={{
           flex: 1, padding: "36px 40px",
           maxWidth: 820, width: "100%", boxSizing: "border-box",
           overflowY: "auto",

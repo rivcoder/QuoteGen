@@ -12,7 +12,7 @@ function MilestoneRow({ milestone, index, onChange, onDelete }) {
           borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontFamily: "inherit", fontSize: 11,
         }}>✕ Remove</button>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 10 }}>
+      <div className="milestone-input-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 10 }}>
         <TextInput label="Milestone Name" value={milestone.name || ""} onChange={v => set("name", v)} placeholder="e.g. Design Approval" />
         <TextInput label="Due Date" value={milestone.date || ""} onChange={v => set("date", v)} type="date" />
         <TextInput label="Amount (₹)" value={milestone.amount || ""} onChange={v => set("amount", v)} type="number" placeholder="15000" />

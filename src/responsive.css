@@ -1,0 +1,64 @@
+/* responsive.css — Mobile responsiveness for QuoteGen */
+
+/* Burger Button Visibility */
+.burger-btn {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  /* Burger Button display on mobile */
+  .burger-btn {
+    display: inline-flex !important;
+  }
+
+  /* Sidebar transformed to drawer */
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 100 !important;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.5) !important;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+  
+  /* Topbar adjust padding */
+  .topbar {
+    padding: 0 16px !important;
+  }
+  
+  /* Content area full width padding adjust */
+  .content-inner {
+    padding: 24px 16px !important;
+  }
+
+  /* Force standard grids to collapse into single columns */
+  .grid-2-col,
+  .payment-schedule-grid,
+  .milestone-input-grid,
+  .profile-grid,
+  .client-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stacking the packages cards vertically */
+  .packages-container {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  /* Bottom actions stack on mobile */
+  .button-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Text size adjustments for title */
+  .hero-amount {
+    font-size: 36px !important;
+  }
+}

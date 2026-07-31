@@ -16,7 +16,7 @@ export default function ClientInfo({ answers, setAnswers }) {
         <div style={{ fontSize: 11, fontWeight: 700, color: C.accentLight, marginBottom: 14, letterSpacing: 1, textTransform: "uppercase" }}>
           Client Details
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div className="grid-2-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <TextInput
             label="Client Name" value={answers.clientName || ""}
             onChange={v => set("clientName", v)} placeholder="Rahul Sharma"

@@ -139,7 +139,7 @@ export default function ClientPortal() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+        <div className="grid-2-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
 
           {/* Breakdown */}
           <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 8, padding: "20px" }}>
@@ -201,7 +201,7 @@ export default function ClientPortal() {
           <div style={{ background: "#12152e", border: "1px solid #1e2140", borderRadius: 8, padding: "20px", marginBottom: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: "#6c63ff", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>Project Details</div>
             {answers.projectDescription && <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.7, marginBottom: 14 }}>{answers.projectDescription}</p>}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div className="grid-2-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               {answers.startDate && <div><div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Start</div><div style={{ fontSize: 13, color: "#f3f4f6" }}>{answers.startDate}</div></div>}
               {answers.endDate && <div><div style={{ fontSize: 11, color: "#6b7280", marginBottom: 2 }}>Est. Completion</div><div style={{ fontSize: 13, color: "#f3f4f6" }}>{answers.endDate}</div></div>}
             </div>

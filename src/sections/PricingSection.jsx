@@ -38,13 +38,13 @@ function LineItemRow({ item, index, onChange, onDelete }) {
 
       <div style={{ marginTop: 10 }}>
         {item.type === "hourly" && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div className="grid-2-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <TextInput label="Hours" value={item.hours || ""} onChange={v => set("hours", v)} placeholder="40" type="number" />
             <TextInput label="Rate (₹/hr)" value={item.rate || ""} onChange={v => set("rate", v)} placeholder="1500" type="number" />
           </div>
         )}
         {item.type === "quantity" && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div className="grid-2-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <TextInput label="Quantity" value={item.qty || ""} onChange={v => set("qty", v)} placeholder="5" type="number" />
             <TextInput label="Unit Price (₹)" value={item.unitPrice || ""} onChange={v => set("unitPrice", v)} placeholder="8000" type="number" />
           </div>

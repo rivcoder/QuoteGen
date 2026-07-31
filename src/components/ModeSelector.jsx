@@ -57,7 +57,7 @@ export default function ModeSelector({ onSelect }) {
       </div>
 
       {/* Mode grid */}
-      <div style={{
+      <div className="mode-grid" style={{
         display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
         gap: 10, maxWidth: 700, width: "100%", marginBottom: 28,
         position: "relative", zIndex: 1,

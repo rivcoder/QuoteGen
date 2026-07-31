@@ -366,7 +366,7 @@ export default function PreviewExport({ answers, setAnswers, profile, onNew, set
       {/* Tiers */}
       <Card style={{ marginBottom: 16 }}>
         <CardTitle>Package Options</CardTitle>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="packages-container" style={{ display: "flex", gap: 8 }}>
           {quote.tierComparison.map(tier => (
             <div key={tier.key} style={{
               flex: 1, background: "#12152e", borderRadius: 12, padding: 14, textAlign: "center",
@@ -399,7 +399,7 @@ export default function PreviewExport({ answers, setAnswers, profile, onNew, set
       {/* Payment schedule */}
       <Card style={{ marginBottom: 16 }}>
         <CardTitle>Payment Schedule</CardTitle>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div className="grid-2-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <div style={{ background: "#12152e", borderRadius: 10, padding: 14, textAlign: "center", border: "1px solid #34d39933" }}>
             <div style={{ fontSize: 11, color: "#34d399", marginBottom: 4 }}>Advance ({quote.advancePct}%)</div>
             <div style={{ fontSize: 18, fontWeight: 800, color: "#34d399" }}>{fmt(quote.advanceAmount, currency)}</div>
@@ -455,7 +455,7 @@ export default function PreviewExport({ answers, setAnswers, profile, onNew, set
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+      <div className="grid-2-col button-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
         <Btn onClick={handleWhatsApp} variant="ghost" style={{ border: "1.5px solid #25D366", color: "#25D366", padding: 13, width: "100%" }}>💬 WhatsApp</Btn>
         <Btn onClick={handleEmail} variant="ghost" style={{ padding: 13, width: "100%" }}>📧 Email</Btn>
         <Btn onClick={handleCopy} variant="ghost" style={{ color: copied ? "#34d399" : "#8b9cf4", padding: 13, width: "100%" }}>{copied ? "✓ Copied!" : "📋 Copy Text"}</Btn>

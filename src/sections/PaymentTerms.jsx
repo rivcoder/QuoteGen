@@ -35,7 +35,7 @@ export default function PaymentTerms({ answers, setAnswers }) {
         />
 
         {quote && (
-          <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div className="grid-2-col" style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {/* Advance */}
             <div style={{
               background: "rgba(34,197,94,0.06)",
@@ -100,7 +100,7 @@ export default function PaymentTerms({ answers, setAnswers }) {
       {/* Late payment */}
       <Card>
         <CardTitle>Late Payment Charge</CardTitle>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div className="grid-2-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <TextInput
             label="Charge (%)"
             value={answers.latePaymentCharge || ""}
