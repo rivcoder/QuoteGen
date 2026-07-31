@@ -98,82 +98,6 @@ Pick your profile on first use — the form, services and pricing adapt to your 
 
 ---
 
-## Getting Started
-
-### Prerequisites
-- Node.js (LTS) — download from [nodejs.org](https://nodejs.org)
-
-### Setup
-
-```bash
-# 1. Create React app
-npx create-react-app quotegen
-cd quotegen
-
-# 2. Clear default src
-rm -rf src/*   # Mac/Linux
-# or: del src\* /q   (Windows)
-
-# 3. Copy all project files into src/ following the structure below
-
-# 4. Install dependencies
-npm install
-
-# 5. Start
-npm start
-```
-
-App runs at `http://localhost:3000`
-
-### File Structure
-
-```
-src/
-├── index.js
-├── App.jsx
-├── quotelogo.png
-├── components/
-│   ├── UI.jsx
-│   ├── Splash.jsx
-│   ├── PINScreen.jsx
-│   ├── ModeSelector.jsx
-│   ├── ClientPortal.jsx
-│   └── QuoteHistory.jsx
-├── sections/
-│   ├── FreelancerProfile.jsx
-│   ├── ClientInfo.jsx
-│   ├── ProjectDetails.jsx
-│   ├── PricingSection.jsx
-│   ├── PaymentTerms.jsx
-│   ├── Milestones.jsx
-│   ├── TermsConditions.jsx
-│   ├── PreviewExport.jsx
-│   └── Templates.jsx
-├── data/
-│   ├── pricing.js
-│   ├── pricing.agency.js
-│   ├── pricing.business.js
-│   ├── pricing.contractor.js
-│   ├── pricing.product.js
-│   └── pricingLoader.js
-└── utils/
-    └── calculate.js
-```
-
----
-
-## Customizing Prices
-
-Open `src/data/pricing.js` (or the relevant mode file) and edit any value:
-
-```js
-static: { label: "Static Website", price: 8000 },  // ← change this
-```
-
-The app recalculates everything automatically. No other files need to change.
-
----
-
 ## Pricing Formula
 
 ```
@@ -190,31 +114,6 @@ Base Price
 Advance = Total × advancePct%
 Remaining = Total − Advance
 ```
-
----
-
-## Roadmap
-
-### Phase 2 — Backend (Flask + PostgreSQL)
-- [ ] User accounts with email/Google login
-- [ ] Quotes saved server-side
-- [ ] Direct email sending (SendGrid)
-- [ ] Client response notifications
-- [ ] Quote status tracking (draft / sent / viewed / accepted / rejected)
-
-### Phase 3 — Growth Features
-- [ ] Invoice generation from accepted quote
-- [ ] AI price suggestion (Claude API)
-- [ ] AI scope generator
-- [ ] Client management dashboard
-- [ ] Analytics — acceptance rates, average deal size
-
-### Phase 4 — Monetization
-- [ ] Free tier — 3 quotes/month
-- [ ] Pro tier — ₹299/month unlimited
-- [ ] Agency tier — ₹999/month, team seats + white label
-- [ ] Custom branding / white label PDF
-- [ ] Razorpay subscription billing
 
 ---
 
